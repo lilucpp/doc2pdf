@@ -1,0 +1,43 @@
+# Build output
+build/
+build64/
+out/
+*.exe
+*.exe.recipe
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.cmake
+
+# Visual Studio
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.vcxproj.state
+*.vcxproj.FileListAbsolute.txt
+*.log
+*.obj
+*.tlog
+*.ipch
+*.ilk
+*.pdb
+Debug/
+Release/
+x64/
+Win32/
+.vs/
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+.vscode/
+
+# Windows
+Thumbs.db
+Desktop.ini
