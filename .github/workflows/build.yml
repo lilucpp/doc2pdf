@@ -1,0 +1,47 @@
+name: build
+
+on:
+  push:
+    branches: [ "master" ]
+    tags: [ "v*" ]
+  pull_request:
+    branches: [ "master" ]
+  release:
+    types: [ published ]
+
+jobs:
+  build:
+    runs-on: windows-2022
+    strategy:
+      matrix:
+        arch: [Win32, x64]
+        include:
+          - arch: Win32
+            suffix: x86
+          - arch: x64
+            suffix: x64
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure CMake
+        run: cmake -G "Visual Studio 17 2022" -A ${{ matrix.arch }} -B build
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: doc2pdf-${{ matrix.suffix }}
+          path: build\Release\doc2pdf.exe
+
+      - name: Upload to release
+        if: github.event_name == 'release' && github.event.action == 'published'
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: build\Release\doc2pdf.exe
+          tag: ${{ github.ref }}
+          asset_name: doc2pdf-${{ matrix.suffix }}.exe
+          overwrite: true

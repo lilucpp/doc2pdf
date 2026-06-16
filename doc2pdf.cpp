@@ -51,9 +51,9 @@ static HRESULT InvokeMethod(IDispatch* obj, const wchar_t* name,
     if (FAILED(hr))
     {
         if (ex.bstrDescription && ex.bstrDescription[0])
-            fprintf(stderr, "  COM错误: %ls (wCode=%u)", ex.bstrDescription, ex.wCode);
+            fprintf(stderr, "  COM error: %ls (wCode=%u)", ex.bstrDescription, ex.wCode);
         else
-            fprintf(stderr, "  COM错误: wCode=%u, 来源=%ls", ex.wCode,
+            fprintf(stderr, "  COM error: wCode=%u, source=%ls", ex.wCode,
                      ex.bstrSource ? ex.bstrSource : L"");
         if (ex.bstrDescription) SysFreeString(ex.bstrDescription);
         if (ex.bstrSource) SysFreeString(ex.bstrSource);
@@ -127,20 +127,20 @@ static BOOL IsClsidRegisteredIn64bit(const wchar_t* clsid)
 
 static void PrintUsage()
 {
-    printf("wps2pdf - 将WPS/Office文档(DOC/DOCX)转换为PDF\n");
+    printf("doc2pdf - Convert WPS/Office documents (DOC/DOCX) to PDF\n");
     printf("Copyright (c) 2025\n");
     printf("\n");
-    printf("用法: wps2pdf <输入文件> [-o 输出文件] [-f 起始页] [-t 结束页]\n");
+    printf("Usage: doc2pdf <input file> [-o output file] [-f from page] [-t to page]\n");
     printf("\n");
-    printf("  -o  输出PDF文件路径 (默认: 输入文件同名.pdf)\n");
-    printf("  -f  起始页码 (默认: 第1页)\n");
-    printf("  -t  结束页码 (默认: 最后一页; 需同时指定 -f)\n");
+    printf("  -o  Output PDF path (default: input file name with .pdf)\n");
+    printf("  -f  Start page (default: page 1)\n");
+    printf("  -t  End page (default: last page; requires -f)\n");
     printf("\n");
-    printf("示例:\n");
-    printf("  wps2pdf 1.docx               导出全部页面\n");
-    printf("  wps2pdf 1.docx -o out.pdf    指定输出路径\n");
-    printf("  wps2pdf 1.docx -f 2 -t 5     导出第2-5页\n");
-    printf("  wps2pdf 1.docx -f 3          从第3页导出到末尾\n");
+    printf("Examples:\n");
+    printf("  doc2pdf 1.docx               Export all pages\n");
+    printf("  doc2pdf 1.docx -o out.pdf    Specify output path\n");
+    printf("  doc2pdf 1.docx -f 2 -t 5     Export pages 2-5\n");
+    printf("  doc2pdf 1.docx -f 3          Export from page 3 to end\n");
 }
 
 // ============================================================
@@ -193,17 +193,17 @@ int wmain(int argc, wchar_t* argv[])
 
     if (hasFrom && fromPage < 1)
     {
-        fprintf(stderr, "错误: 起始页码必须大于0\n");
+        fprintf(stderr, "Error: start page must be greater than 0\n");
         return 1;
     }
     if (hasTo && toPage < 1)
     {
-        fprintf(stderr, "错误: 结束页码必须大于0\n");
+        fprintf(stderr, "Error: end page must be greater than 0\n");
         return 1;
     }
     if (hasFrom && hasTo && fromPage > toPage)
     {
-        fprintf(stderr, "错误: 起始页码不能大于结束页码\n");
+        fprintf(stderr, "Error: start page cannot be greater than end page\n");
         return 1;
     }
 
@@ -224,7 +224,7 @@ int wmain(int argc, wchar_t* argv[])
     HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
     if (FAILED(hr))
     {
-        fprintf(stderr, "错误: COM初始化失败 (0x%08X)\n", hr);
+        fprintf(stderr, "Error: COM initialization failed (0x%08X)\n", hr);
         return 2;
     }
 
@@ -266,28 +266,28 @@ int wmain(int argc, wchar_t* argv[])
         {
             if (IsSystem64Bit() && IsClsidRegisteredIn64bit(kApps[i].clsid))
             {
-                fprintf(stderr, "错误: 检测到64位%ls，但本工具为32位。\n", kApps[i].displayName);
-                fprintf(stderr, "请安装32位版本，或使用64位版本的wps2pdf。\n");
+                fprintf(stderr, "Error: detected 64-bit %ls but this tool is 32-bit.\n", kApps[i].displayName);
+                fprintf(stderr, "      Install the 32-bit version, or use the 64-bit doc2pdf.\n");
                 found64bit = TRUE;
                 break;
             }
         }
         if (!found64bit)
         {
-            fprintf(stderr, "错误: 未找到WPS Office或Microsoft Office。请确保已安装其中之一。\n");
+            fprintf(stderr, "Error: no WPS Office or Microsoft Office found. Please ensure one is installed.\n");
         }
         CoUninitialize();
         return 3;
     }
 
-    printf("检测到: %ls\n", appName);
+    printf("Detected: %ls\n", appName);
 
     // ---- Get Documents collection ----
     IDispatch* docs = NULL;
     hr = GetDispatchProp(app, L"Documents", &docs);
     if (FAILED(hr))
     {
-        fprintf(stderr, "错误: 无法获取Documents接口\n");
+        fprintf(stderr, "Error: cannot get Documents interface\n");
         app->Release();
         CoUninitialize();
         return 5;
@@ -316,7 +316,7 @@ int wmain(int argc, wchar_t* argv[])
 
     if (FAILED(hr) || openResult.vt != VT_DISPATCH)
     {
-        fprintf(stderr, "错误: 无法打开文档 '%ls'\n", inputPath);
+        fprintf(stderr, "Error: cannot open document '%ls'\n", inputPath);
         for (int i = 0; i < 12; i++) VariantClear(&openArgs[i]);
         app->Release();
         CoUninitialize();
@@ -337,7 +337,7 @@ int wmain(int argc, wchar_t* argv[])
     if (useRange && !hasTo)
         toPage = 9999;  // "to end of document"
 
-    printf("正在转换 [%ls]\n      -> [%ls]\n", inputPath, outputPath);
+    printf("Converting [%ls]\n      -> [%ls]\n", inputPath, outputPath);
 
     if (useRange)
     {
@@ -372,9 +372,9 @@ int wmain(int argc, wchar_t* argv[])
     }
 
     if (FAILED(hr))
-        fprintf(stderr, "\n错误: PDF导出失败 (0x%08X)\n", hr);
+        fprintf(stderr, "\nError: PDF export failed (0x%08X)\n", hr);
     else
-        printf("转换成功\n");
+        printf("Conversion successful\n");
 
     // ---- Cleanup ----
     InvokeMethod(doc, L"Close", NULL, 0, NULL);
