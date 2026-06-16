@@ -10,6 +10,9 @@ on:
 permissions:
   contents: write
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     runs-on: windows-2022
@@ -23,7 +26,7 @@ jobs:
             suffix: x64
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Configure CMake
         run: cmake -G "Visual Studio 17 2022" -A ${{ matrix.arch }} -B build
@@ -32,7 +35,7 @@ jobs:
         run: cmake --build build --config Release
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: doc2pdf-${{ matrix.suffix }}
           path: build\Release\doc2pdf.exe
